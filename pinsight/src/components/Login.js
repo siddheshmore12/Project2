@@ -6,7 +6,7 @@ import { Card, Form, Button, Container, Row, Col } from "react-bootstrap";
 const Login = () => {
     const handlePinterestLogin = () => {
         // Redirect to your backend's Pinterest OAuth URL
-        window.location.href = 'http://localhost:5000/auth/pinterest';
+        window.location.href = 'https://pinsight-backend-467347019902.us-central1.run.app/auth/pinterest';
     };
     const backgroundImage = require("./backImage.png");
 

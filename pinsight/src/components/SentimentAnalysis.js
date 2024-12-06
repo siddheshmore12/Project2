@@ -102,24 +102,27 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 const SentimentAnalysis = () => {
     const { pinId } = useParams(); // Get pinId from URL params
     const [sentimentData, setSentimentData] = useState(null);
+    const [movieSuggestions, setMovieSuggestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const accessToken = query.get('accessToken');
-        const pinIdFromUrl = query.get('pinId') || pinId;  // Get pinId from URL or fallback to pinId from params
+        const pinIdFromUrl = query.get('pinId') || pinId; // Get pinId from URL or fallback to pinId from params
 
         if (accessToken && pinIdFromUrl) {
             // Send the accessToken and pinId to the backend
             axios.post(
-                'http://localhost:5000/sentiment-analysis',  // Make sure the backend URL is correct
-                { pinId: pinIdFromUrl },  // Pass the pinId in the body
+                'https://pinsight-backend-467347019902.us-central1.run.app/sentiment-analysis', // Make sure the backend URL is correct
+                { pinId: pinIdFromUrl }, // Pass the pinId in the body
                 { headers: { Authorization: `Bearer ${accessToken}` } }
             )
                 .then((response) => {
-                    if (response.data && response.data.length > 0) {
-                        setSentimentData(response.data);  // Set the sentiment data if available
+                    const { analysis, movieSuggestions } = response.data;
+                    if (analysis && analysis.length > 0) {
+                        setSentimentData(analysis); // Set the sentiment data
+                        setMovieSuggestions(movieSuggestions || []); // Set movie suggestions
                     } else {
                         setError('No sentiment data found for this pin.');
                     }
@@ -134,7 +137,7 @@ const SentimentAnalysis = () => {
             setError('No access token or pin ID found. Please log in again.');
             setLoading(false);
         }
-    }, [pinId]);  // Dependency array ensures the effect runs when pinId changes
+    }, [pinId]); // Dependency array ensures the effect runs when pinId changes
 
     const generatePDF = () => {
         const doc = new jsPDF();
@@ -149,11 +152,19 @@ const SentimentAnalysis = () => {
                 doc.text(`Surprise: ${data.surprise}%`, 20, 60 + (index * 30));
                 doc.text(`Mood: ${data.mood}`, 20, 70 + (index * 30));
             });
+
+            if (movieSuggestions.length > 0) {
+                doc.addPage();
+                doc.text("Movie Suggestions", 20, 20);
+                movieSuggestions.forEach((movie, index) => {
+                    doc.text(`${index + 1}. ${movie.title} (${movie.year})`, 20, 30 + (index * 10));
+                });
+            }
         } else {
             doc.text("No sentiment data available.", 20, 30);
         }
 
-        doc.save('sentiment-analysis-report.pdf');  // Save the generated PDF
+        doc.save('sentiment-analysis-report.pdf'); // Save the generated PDF
     };
 
     // Show loading state
@@ -191,10 +202,27 @@ const SentimentAnalysis = () => {
             ) : (
                 <div>No sentiment data available for this pin.</div>
             )}
+
+            <h2>Movie Suggestions</h2>
+            {movieSuggestions.length > 0 ? (
+                <ul className="movie-suggestions">
+                    {movieSuggestions.map((movie, index) => (
+                        <li key={index}>
+                            <a href={movie.imdbLink} target="_blank" rel="noopener noreferrer">
+                                {movie.title} ({movie.year})
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p>No movie suggestions available for this mood.</p>
+            )}
+
             <button onClick={generatePDF} className="generate-pdf-button">Generate PDF</button>
         </div>
     );
 };
 
 export default SentimentAnalysis;
+
 

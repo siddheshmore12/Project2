@@ -21,7 +21,7 @@ const Album = () => {
             }
 
             try {
-                const response = await axios.get('http://localhost:5000/fetch-albums', {
+                const response = await axios.get('https://pinsight-backend-467347019902.us-central1.run.app/fetch-albums', {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
