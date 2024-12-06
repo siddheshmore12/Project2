@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import SentimentAnalysis from './components/SentimentAnalysis'; // Importing SentimentAnalysis component
 import Album from "./components/Album";
 
+
 const App = () => {
     return (
         <BrowserRouter>
@@ -23,6 +24,7 @@ const App = () => {
                 <Route path="/sentiment-analysis/:pinId" element={<SentimentAnalysis />} />
 
                 <Route path="/album" element={<Album />} />
+
 
                 {/* Uncomment these routes if you need them */}
                 {/*<Route path="/pdf-report/:pinId" element={<PDFReport />} />*/}
